@@ -1,6 +1,6 @@
-# Thiền Viện An Nhiên 3D — V2
+# Thiền Viện An Nhiên 3D — V3
 
-Prototype Three.js + Vite chạy độc lập. V2 tăng chi tiết chibi và chuyển động theo state machine: đi vào, xoay về Phật, chuẩn bị, thực hiện, đứng lên và đi ra. Không sử dụng GLB có rig hoặc multiplayer.
+V3 phát triển từ chính source V2. Vite + Three.js; Supabase Realtime **tùy chọn**.
 
 ## Chạy local
 
@@ -9,26 +9,44 @@ npm install
 npm run dev
 ```
 
-## Build và triển khai Vercel
+Mở địa chỉ Vite thông báo (thường `http://localhost:5173`).
 
-```bash
-npm run build
-```
+## Deploy từ GitHub lên Vercel
 
-- Framework: Vite
-- Root directory: `./`
-- Build command: `npm run build`
-- Output directory: `dist`
+1. Sao lưu source V2 nếu cần. Giải nén ZIP V3.
+2. **Copy nội dung của thư mục `sansa-temple-3d/` vào thư mục gốc repository hiện có**, ghi đè file trùng tên, giữ đúng thư mục `src/`.
+3. Commit & push. Vercel tự deploy nếu kết nối branch Production.
+4. Vercel Project > Deployments > kiểm tra build `Ready`.
 
-Cập nhật GitHub repository đã gắn Vercel: thay các file trong repo bằng nội dung zip này, commit. Vercel sẽ tự deploy nếu bật auto-deployment.
+Vite: Build `npm run build`; Output `dist`; Root `./` nếu `package.json` nằm ở root.
 
-## Những điểm mới V2
+## Cho người khác vào *cùng một gian* (Supabase Realtime)
 
-- Hướng mặt và di chuyển đúng chiều; quỳ/ngồi hướng bàn thờ.
-- Chuyển động tư thế mượt hơn, có chuẩn bị/quỳ/cúi/đứng lại.
-- Mặt chibi có thêm tóc mái, chân mày, điểm sáng mắt và nụ cười.
-- Nhang/hoa được biểu diễn trong cảnh sau khi dâng.
+**Bắt buộc cấu hình** nếu cần hai trình duyệt nhìn thấy nhau. Không cần database SQL cho bản presence demo.
 
-## Giới hạn
+1. Tạo Supabase project riêng, vào **Project Settings > API / Data API** (tên mục có thể thay đổi).
+2. Lấy **Project URL** và **anon / publishable key** (key dùng trên browser). **TUYỆT ĐỐI không dùng `service_role` / secret key**.
+3. Vercel > Project > Settings > Environment Variables, tạo:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+4. Redeploy để Vite nhúng cấu hình lúc build.
+5. Mở cùng URL web trên hai máy / trình duyệt. Mọi người chọn tên, avatar rồi bấm **Vào chánh điện**.
+6. `?room=main-hall` là gian mặc định. Có thể dùng `?room=other-room` để tách gian, tuy nhiên demo hiện chia sẻ cảnh y hệt nhau.
+7. Nếu WebSocket báo lỗi, kiểm tra Supabase Realtime đang được bật cho project và kiểm tra DevTools Console / Network.
 
-Mô hình và chuyển động vẫn là mesh + joint dựng procedural bằng code, không phải file GLB rig chuyên nghiệp. Chưa có điều khiển bằng animation clip hoặc đồng bộ nhiều người. Không thể đảm bảo mọi thiết bị chạy mượt khi chưa kiểm thử trình duyệt thực tế.
+## Giới hạn kỹ thuật V3
+
+- Model chibi **dựng bằng primitive**, không phải rig GLB/skinned mesh chuyên nghiệp. Tư thế xếp bằng và quỳ hiện là giải pháp chuyển hình học, chưa đạt mocap tự nhiên.
+- Nhân vật khách khác được hiển thị dưới dạng **avatar 3D nhẹ**, có vị trí, tên và hoạt động; không đồng bộ đầy đủ skeleton động tác. Realtime đồng bộ ~4 lần/giây bằng Presence, không tối ưu khi phòng rất đông.
+- Chiếm đệm: phát hiện đệm đã dùng bằng Presence, **không phải khóa giao dịch tập trung**. Hai người bấm cùng lúc có thể trùng chỗ. Cần backend RPC/DB hoặc server phòng có quyền điều phối trước khi chạy production.
+- Âm thanh cần thao tác người dùng để bật; browser có thể chặn autoplay.
+- Tự động sáng / trưa / chiều / tối theo **giờ thiết bị của từng người**, các thiết bị khác múi giờ có thể nhìn ánh sáng khác.
+- V3 chưa có hệ thống tài khoản, chống spam, phân quyền, kiểm duyệt tên người dùng hay lưu lịch sử phòng. Không phù hợp vận hành công khai diện rộng ngay.
+
+## Tính năng
+- 15 bồ đoàn oval bo tròn, 3 hàng × 5.
+- Chọn chibi nữ tóc búi hoặc chibi nam tóc ngắn; cả hai mặc đồ lam.
+- Tên trên đầu, màn hình nhập tên.
+- Tư thế xếp bằng / quỳ phân biệt, lễ hương và sen ở vị trí giữa hai tay (chuyển động procedural).
+- Sáng / trưa / chiều / tối tự động theo giờ hoặc chỉnh thủ công.
+- Phòng Realtime Presence tùy chọn: người dùng khác nhìn thấy tên, vị trí, trạng thái cơ bản.
