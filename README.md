@@ -30,3 +30,10 @@ Push toàn bộ thư mục lên repo GitHub, chọn **Add New → Project** trê
 - Điểm đặt đồ lễ là vị trí staging; muốn hoa/nhang tồn tại sau khi cúng cần bổ sung state vật phẩm và animations tay chính xác.
 - Bản sản xuất nên dùng GLB riêng có skeleton chuẩn + AnimationMixer/clip, navmesh, collision, LOD, asset compression, và server-side room state.
 - Không có MP3 tụng kinh bản quyền được đóng gói. Âm nền hiện là tone tổng hợp, bật thủ công do chính sách autoplay của browser.
+
+## V1.1 - Fix hướng nhân vật
+- Chibi được xây với hướng mặt local +Z. Khi đi, góc yaw dùng `Math.atan2(d.x, d.z)` (không dùng số âm).
+- Khi đến đệm/lư/điện, nhân vật quay về hướng tượng Phật (world -Z = yaw Math.PI).
+- Vị trí lễ Phật và niệm Phật đã dời vào giữa đệm ngồi.
+- Khi dừng, nhân vật quay về trạng thái đứng ban đầu.
+- Đẩy `src/main.js` mới lên GitHub, Vercel sẽ tự redeploy nếu đã liên kết repo.
