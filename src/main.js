@@ -50,7 +50,16 @@ const figure=new THREE.Group();scene.add(figure);figure.position.set(0,.23,4.4);
 const skin=mat(0xffd5bd),hair=mat(0x49302b),dress=mat(0xd3a0a2),pants=mat(0x7d9a91),black=mat(0x292b34),pink=mat(0xec9397);
 const body=new THREE.Group();body.position.y=.89;figure.add(body);const torso=sphere(.39,dress,body,0,.29,0);torso.scale.set(1.05,1.22,.75);
 const headJoint=new THREE.Group();headJoint.position.set(0,.92,0);body.add(headJoint);let head=sphere(.48,skin,headJoint,0,.36,.03);head.scale.set(1.05,1.12,1.0);const haircap=sphere(.5,hair,headJoint,0,.56,-.03);haircap.scale.set(1.08,.57,1.02);for(let s of [-1,1]){sphere(.072,black,headJoint,s*.19,.36,.46);sphere(.085,pink,headJoint,s*.34,.20,.40).scale.set(1,.55,.5)}sphere(.034,mat(0xc77e75),headJoint,0,.22,.51);
-let bun=sphere(.24,hair,headJoint,.43,.66,-.26);const arms=[];for(let s of [-1,1]){let shoulder=new THREE.Group();shoulder.position.set(s*.36,.54,0);body.add(shoulder);let upper=sphere(.15,dress,shoulder,s*.05,-.22,0);upper.scale.set(.83,1.85,.87);let elbow=new THREE.Group();elbow.position.set(s*.08,-.43,0);shoulder.add(elbow);let fore=sphere(.115,skin,elbow,0,-.18,.02);fore.scale.set(.8,1.6,.8);sphere(.12,skin,elbow,0,-.37,.03);arms.push({shoulder,elbow,s})}
+let bun=sphere(.24,hair,headJoint,.43,.66,-.26);
+// V2: stylized details. The local +Z side is the face, including when facing the Buddha.
+for(const side of [-1,1]){
+ const brow=box(.14,.023,.016,hair,headJoint,side*.19,.49,.477);brow.rotation.z=side*.12;
+ const eyeShine=sphere(.022,mat(0xffffff),headJoint,side*.17,.397,.527);eyeShine.scale.set(.7,.85,.35);
+ const fringe=sphere(.14,hair,headJoint,side*.25,.69,.28);fringe.scale.set(1.5,.52,.7);
+}
+const smile=mesh(new THREE.TorusGeometry(.082,.013,6,18,Math.PI),mat(0x9d5a52),headJoint,0,.18,.506);smile.rotation.z=Math.PI;
+const collar=mesh(new THREE.TorusGeometry(.21,.055,9,24),mat(0xffe4ce),body,0,.57,0);collar.rotation.x=Math.PI/2;
+const arms=[];for(let s of [-1,1]){let shoulder=new THREE.Group();shoulder.position.set(s*.36,.54,0);body.add(shoulder);let upper=sphere(.15,dress,shoulder,s*.05,-.22,0);upper.scale.set(.83,1.85,.87);let elbow=new THREE.Group();elbow.position.set(s*.08,-.43,0);shoulder.add(elbow);let fore=sphere(.115,skin,elbow,0,-.18,.02);fore.scale.set(.8,1.6,.8);sphere(.12,skin,elbow,0,-.37,.03);arms.push({shoulder,elbow,s})}
 const legs=[];for(let s of [-1,1]){let hip=new THREE.Group();hip.position.set(s*.19,.72,0);figure.add(hip);let leg=sphere(.17,pants,hip,0,-.28,0);leg.scale.set(.9,1.9,.9);let knee=new THREE.Group();knee.position.y=-.48;hip.add(knee);sphere(.14,pants,knee,0,-.20,0).scale.set(.85,1.55,.85);sphere(.18,mat(0x69483a),knee,0,-.43,.13).scale.set(.96,.5,1.65);legs.push({hip,knee,s})}
 const handItem=new THREE.Group();body.add(handItem);handItem.position.set(0,.4,.59);const sticks=new THREE.Group();handItem.add(sticks);for(let i=-1;i<=1;i++){cylinder(.012,.012,.53,mat(0x9e5235),sticks,i*.06,.0,0);sphere(.02,mat(0xe9c1a2),sticks,i*.06,.28,0)}sticks.position.y=.06;const offering=lotus(handItem,0,.07,0,.7);handItem.visible=false;
 const rayClock=new THREE.Clock();const tmpVec=new THREE.Vector3();let active=null;let phase='idle';let phaseTime=0;let actionTime=0;let repeat=0;let count=0;let path=[];let legPhase=0;let time=0;let motionDuration=0;let muted=true;let audioCtx=null;let audioNodes=[];const activityButtons=[...document.querySelectorAll('[data-act]')];
@@ -58,24 +67,57 @@ const home=new THREE.Vector3(0,.23,4.4);const positions={incense:new THREE.Vecto
 function entry(t){const node=document.createElement('div');node.className='entry';let stamp=new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});let a=document.createElement('time');a.textContent=stamp;let b=document.createElement('span');b.textContent=t;node.append(a,b);document.querySelector('#log').prepend(node);while(document.querySelector('#log').children.length>24)document.querySelector('#log').lastChild.remove()}
 function status(t,p=0){document.querySelector('#status').textContent=t;document.querySelector('#progress').style.width=`${Math.max(0,Math.min(100,p*100))}%`}
 function setPhase(s){phase=s;phaseTime=0}
-function start(a){if(active)return;handItem.position.set(0,.4,.59);active=a;repeat=0;count=0;actionTime=0;const labels={incense:'Thắp hương',bow:'Lễ Phật',flower:'Dâng hoa sen',chant:'Ngồi niệm Phật'};entry(`Bắt đầu: ${labels[a]}`);activityButtons.forEach(b=>{b.disabled=true;b.classList.toggle('active',b.dataset.act===a)});handItem.visible=['incense','flower'].includes(a);sticks.visible=a==='incense';offering.visible=a==='flower';path=[positions[a].clone()];setPhase('walk-in');status('Đang di chuyển vào chánh điện')}
-function stop(done=false){let was=active;active=null;handItem.visible=false;activityButtons.forEach(b=>{b.disabled=false;b.classList.remove('active')});if(done){entry('Đã hoàn thành hoạt động 🌸');status('Hoàn thành · Tâm an, vạn sự an lành',1)}else{entry(was?'Đã dừng hoạt động':'Trở về vị trí ban đầu');status('Sẵn sàng bắt đầu',0)}setPhase('idle');if(!done){figure.position.copy(home);figure.rotation.y=0}resetPose()}
+function start(a){if(active)return;handItem.position.set(0,.4,.59);active=a;offeredIncense.visible=false;flowerPlaced.visible=false;repeat=0;count=0;actionTime=0;const labels={incense:'Thắp hương',bow:'Lễ Phật',flower:'Dâng hoa sen',chant:'Ngồi niệm Phật'};entry(`Bắt đầu: ${labels[a]}`);activityButtons.forEach(b=>{b.disabled=true;b.classList.toggle('active',b.dataset.act===a)});handItem.visible=['incense','flower'].includes(a);sticks.visible=a==='incense';offering.visible=a==='flower';path=[positions[a].clone()];setPhase('walk-in');status('Đang di chuyển vào chánh điện')}
+function stop(done=false){let was=active;active=null;handItem.visible=false;activityButtons.forEach(b=>{b.disabled=false;b.classList.remove('active')});if(done){entry('Đã hoàn thành hoạt động 🌸');status('Hoàn thành · Tâm an, vạn sự an lành',1)}else{entry(was?'Đã dừng hoạt động':'Trở về vị trí ban đầu');status('Sẵn sàng bắt đầu',0)}setPhase('idle');if(!done){figure.position.copy(home);figure.rotation.y=0}resetV2Pose()}
 function resetPose(){body.rotation.set(0,0,0);body.position.y=.89;headJoint.rotation.set(0,0,0);for(let a of arms){a.shoulder.rotation.set(0,0,0);a.elbow.rotation.set(0,0,0)}for(let l of legs){l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0)}}
 function interpolateTo(dest,dt){let d=dest.clone().sub(figure.position);d.y=0;const len=d.length();if(len<.07)return true;let step=Math.min(len,dt*1.55);figure.position.addScaledVector(d.normalize(),step);// Chibi's eyes and chest point toward local +Z. Rotate that forward vector toward travel direction.
 const angle=Math.atan2(d.x,d.z);let delta=Math.atan2(Math.sin(angle-figure.rotation.y),Math.cos(angle-figure.rotation.y));figure.rotation.y+=delta*Math.min(1,dt*7);legPhase+=dt*11;for(let l of legs){l.hip.rotation.x=Math.sin(legPhase+l.s*Math.PI/2)*.5;l.knee.rotation.x=Math.max(0,Math.sin(legPhase+l.s*Math.PI/2))*.24}for(let a of arms)a.shoulder.rotation.x=-Math.sin(legPhase+a.s*Math.PI/2)*.36;body.position.y=.89+Math.abs(Math.sin(legPhase))*.035;return false}
 function faceAltar(dt){const altarFacing=Math.PI;let diff=Math.atan2(Math.sin(altarFacing-figure.rotation.y),Math.cos(altarFacing-figure.rotation.y));figure.rotation.y+=diff*Math.min(1,dt*8)}
-function finish(){setPhase('walk-out');entry('Nhân vật đang trở về vị trí ban đầu')}
-function step(dt){time+=dt;phaseTime+=dt;if(!active){headJoint.rotation.z=Math.sin(time*1.2)*.018;body.position.y=.89+Math.sin(time*2)*.009;return}actionTime+=dt;
- if(phase==='walk-in'){if(interpolateTo(path[0],dt)){setPhase('prepare');resetPose();faceAltar(dt)}return}
- if(phase==='prepare'){faceAltar(dt);if(phaseTime<.75){for(let a of arms)a.shoulder.rotation.x=-Math.min(1,phaseTime/.7)*.9;return}if(active==='incense'){entry('Chắp tay nâng 3 nén hương');setPhase('perform');motionDuration=4}else if(active==='flower'){entry('Dâng hoa sen lên điện Phật');setPhase('perform');motionDuration=3.7}else if(active==='bow'){repeat=Number(document.querySelector('#bows').value);entry(`Bắt đầu lễ Phật ${repeat} lạy`);setPhase('perform');motionDuration=2.8}else{repeat=Number(document.querySelector('#chants').value);entry(`Bắt đầu niệm ${repeat} biến “Nam mô A Di Đà Phật”`);setPhase('perform');motionDuration=2.2}return}
+// V2 animation controller. The pose is interpolated each frame instead of snapping.
+const ease=(t)=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*(3-2*t)};
+const smooth=(value,target,dt,speed=9)=>THREE.MathUtils.damp(value,target,speed,dt);
+const pose={bodyY:.89,torsoX:0,headX:0,armX:0,armZ:0,elbowX:0,hipX:0,kneeX:0,handY:.4,handZ:.59};
+function poseTo(target,dt){for(const key in pose)pose[key]=smooth(pose[key],target[key]??({bodyY:.89,torsoX:0,headX:0,armX:0,armZ:0,elbowX:0,hipX:0,kneeX:0,handY:.4,handZ:.59})[key],dt);body.position.y=pose.bodyY;body.rotation.x=pose.torsoX;headJoint.rotation.x=pose.headX;for(const a of arms){a.shoulder.rotation.x=pose.armX;a.shoulder.rotation.z=a.s*pose.armZ;a.elbow.rotation.x=pose.elbowX}for(const l of legs){l.hip.rotation.x=pose.hipX;l.knee.rotation.x=pose.kneeX}handItem.position.y=pose.handY;handItem.position.z=pose.handZ}
+function faceTarget(dir,dt){const target=Math.atan2(dir.x,dir.z);const diff=Math.atan2(Math.sin(target-figure.rotation.y),Math.cos(target-figure.rotation.y));figure.rotation.y+=diff*Math.min(1,dt*9)}
+function walkTo(dest,dt){const d=dest.clone().sub(figure.position);d.y=0;const distance=d.length();if(distance<.055)return true;faceTarget(d,dt);figure.position.addScaledVector(d.normalize(),Math.min(distance,dt*1.65));legPhase+=dt*10.5;body.position.y=.89+Math.abs(Math.sin(legPhase))*.055;for(const l of legs){l.hip.rotation.x=Math.sin(legPhase+l.s*Math.PI/2)*.44;l.knee.rotation.x=Math.max(0,Math.sin(legPhase+l.s*Math.PI/2))*.3}for(const a of arms){a.shoulder.rotation.x=-Math.sin(legPhase+a.s*Math.PI/2)*.32;a.shoulder.rotation.z=0;a.elbow.rotation.x=0}return false}
+const flowerPlaced=lotus(scene,2.18,2.32,-5.55,.0);flowerPlaced.visible=false;
+const offeredIncense=new THREE.Group();scene.add(offeredIncense);offeredIncense.position.set(-3.1,1.3,-3.8);for(let i=-1;i<=1;i++){cylinder(.013,.013,.46,mat(0x9e5235),offeredIncense,i*.09,.23,0);sphere(.024,mat(0xedc2a7),offeredIncense,i*.09,.46,0)}offeredIncense.visible=false;
+function resetV2Pose(){for(const k in pose)pose[k]=({bodyY:.89,torsoX:0,headX:0,armX:0,armZ:0,elbowX:0,hipX:0,kneeX:0,handY:.4,handZ:.59})[k];resetPose()}
+function finish(){setPhase('recover');entry('Nhân vật chuẩn bị đứng dậy và trở về')}
+function step(dt){time+=dt;phaseTime+=dt;
+ if(!active){headJoint.rotation.z=Math.sin(time*1.2)*.018;body.position.y=.89+Math.sin(time*2)*.009;return}
+ actionTime+=dt;
+ if(phase==='walk-in'){if(walkTo(path[0],dt)){resetV2Pose();setPhase('turn-to-altar')}return}
+ if(phase==='turn-to-altar'){faceAltar(dt);poseTo({armX:-.55,armZ:-.2,elbowX:-.25},dt);if(phaseTime>1.0)setPhase('prepare');return}
+ if(phase==='prepare'){faceAltar(dt);poseTo({armX:-1.05,armZ:-.42,elbowX:-.45},dt);if(phaseTime<.95)return;
+  if(active==='incense'){entry('Nâng 3 nén hương hướng về Đức Phật');motionDuration=4}
+  else if(active==='flower'){entry('Nâng hoa sen hướng về Đức Phật');motionDuration=4}
+  else if(active==='bow'){repeat=Number(document.querySelector('#bows').value);entry(`Bắt đầu lễ Phật ${repeat} lạy`);motionDuration=3.8}
+  else{repeat=Number(document.querySelector('#chants').value);entry(`Bắt đầu niệm ${repeat} biến “Nam mô A Di Đà Phật”`);motionDuration=1.9}
+  setPhase('perform');return}
  if(phase==='perform'){
- faceAltar(dt);let t=phaseTime;
- if(active==='incense'){let k=Math.sin(Math.min(1,t/2)*Math.PI/2);for(let a of arms){a.shoulder.rotation.x=-1.25*k;a.shoulder.rotation.z=a.s*-.50*k;a.elbow.rotation.x=-.4*k}handItem.position.y=.4+.23*k;handItem.position.z=.59-.15*k;status('Đang dâng hương',t/motionDuration);if(t>motionDuration){handItem.visible=false;entry('Đã cắm 3 nén nhang vào lư');finish()}}
- else if(active==='flower'){let k=Math.min(1,t/2);for(let a of arms){a.shoulder.rotation.x=-1.3*k;a.shoulder.rotation.z=-a.s*.45*k}handItem.position.y=.42+k*.25;handItem.position.z=.56+k*.17;status('Đang dâng hoa sen',t/motionDuration);if(t>motionDuration){handItem.visible=false;entry('Đã đặt hoa sen lên bàn thờ');finish()}}
- else if(active==='bow'){let u=Math.min(1,t/motionDuration);let bow=Math.sin(u*Math.PI)**2;body.position.y=.49-.12*bow;body.rotation.x=.12+bow*.9;headJoint.rotation.x=bow*.28;for(let l of legs){l.hip.rotation.x=-1.15;l.knee.rotation.x=1.55}for(let a of arms){a.shoulder.rotation.x=-1.1-bow*.6;a.shoulder.rotation.z=-a.s*.3;a.elbow.rotation.x=-.4}status(`Đang lễ Phật · ${count+1}/${repeat} lạy`,(count+u)/repeat);if(t>=motionDuration){count++;if(count===repeat){entry(`Hoàn thành ${repeat} lạy`);resetPose();finish()}else{setPhase('perform');if(count%10===0)entry(`Đã thực hiện ${count}/${repeat} lạy`)}}}
- else if(active==='chant'){body.position.y=.45;body.rotation.x=.05;for(let l of legs){l.hip.rotation.x=-1.32;l.knee.rotation.x=1.65}for(let a of arms){a.shoulder.rotation.x=-1.2;a.shoulder.rotation.z=-a.s*.56;a.elbow.rotation.x=-.30}headJoint.rotation.x=Math.sin(t*3)*.025;status(`Nam mô A Di Đà Phật · ${count+1}/${repeat}`,(count+Math.min(1,t/motionDuration))/repeat);if(t>=motionDuration){count++;if(count===repeat){entry(`Đã hoàn thành ${repeat} biến niệm Phật`);resetPose();finish()}else{setPhase('perform');if(count%9===0)entry(`Đã niệm ${count}/${repeat} biến`)}}}
- return}
- if(phase==='walk-out'){resetPose();if(interpolateTo(home,dt)){figure.rotation.y=0;stop(true)}else status('Đang trở về vị trí ban đầu',.95)}
+  faceAltar(dt);const t=phaseTime;const u=THREE.MathUtils.clamp(t/motionDuration,0,1);
+  if(active==='incense'){
+   const raise=ease(t/1.7);poseTo({armX:-1.35*raise,armZ:-.52*raise,elbowX:-.45*raise,handY:.4+.30*raise,handZ:.59+.10*raise},dt);
+   status('Đang dâng 3 nén hương',u);
+   if(t>=motionDuration){handItem.visible=false;offeredIncense.visible=true;entry('Đã cắm 3 nén hương vào lư');finish()}
+  }else if(active==='flower'){
+   const raise=ease(t/1.7);poseTo({armX:-1.4*raise,armZ:-.52*raise,elbowX:-.42*raise,handY:.4+.32*raise,handZ:.59+.10*raise},dt);
+   status('Đang dâng hoa sen',u);
+   if(t>=motionDuration){handItem.visible=false;flowerPlaced.visible=true;flowerPlaced.scale.setScalar(.75);entry('Đã đặt hoa sen trên bàn thờ');finish()}
+  }else if(active==='bow'){
+   // One repetition contains a distinct kneel, down-bow, return and brief upright pause.
+   const kneel=ease(t/.9);const down=ease((t-1.05)/.7);const up=ease((t-2.15)/.7);const bend=Math.max(0,down-up);
+   poseTo({bodyY:.89-.42*kneel-.08*bend,torsoX:.10*kneel+1.05*bend,headX:.28*bend,armX:-.8*kneel-.72*bend,armZ:-.42*kneel,elbowX:-.35*kneel,hipX:-1.2*kneel,kneeX:1.55*kneel},dt,10);
+   status(`Đang lễ Phật · ${count+1}/${repeat} lạy`,(count+u)/repeat);
+   if(t>=motionDuration){count++;if(count>=repeat){entry(`Hoàn thành ${repeat} lạy`);finish()}else{setPhase('perform');if(count%10===0)entry(`Đã lễ ${count}/${repeat} lạy`)}}
+  }else{
+   const sit=ease(t/.9);poseTo({bodyY:.89-.42*sit,torsoX:.08*sit,headX:.03+Math.sin(time*2)*.025,armX:-1.15*sit,armZ:-.50*sit,elbowX:-.35*sit,hipX:-1.32*sit,kneeX:1.65*sit},dt);
+   status(`Nam mô A Di Đà Phật · ${count+1}/${repeat}`,(count+u)/repeat);
+   if(t>=motionDuration){count++;if(count>=repeat){entry(`Đã hoàn thành ${repeat} biến niệm Phật`);finish()}else{setPhase('perform');if(count%9===0)entry(`Đã niệm ${count}/${repeat} biến`)}}
+  }return}
+ if(phase==='recover'){faceAltar(dt);poseTo({},dt);if(phaseTime>1.35){resetV2Pose();setPhase('walk-out')}return}
+ if(phase==='walk-out'){if(walkTo(home,dt)){figure.rotation.y=0;stop(true)}else status('Đang đi ra khỏi chánh điện',.95)}
 }
 activityButtons.forEach(b=>b.addEventListener('click',()=>start(b.dataset.act)));document.querySelector('#cancel').addEventListener('click',()=>stop());document.querySelector('#resetcam').addEventListener('click',()=>{camera.position.set(13,11,17);controls.target.set(0,1.5,-1.4);controls.update()});document.querySelector('#gender').addEventListener('change',e=>{const female=e.target.value==='female';bun.visible=female;torso.material=female?dress:pants;for(let a of arms){a.shoulder.children[0].material=female?dress:pants}document.querySelector('#actorlabel').textContent=female?'Chibi nữ':'Chibi nam';entry(`Đổi nhân vật: ${female?'Chibi nữ':'Chibi nam'}`)});
 // Simple ambient drone via Web Audio. Must be enabled by user gesture (browser autoplay policy)

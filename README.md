@@ -1,6 +1,6 @@
-# Thiền Viện An Nhiên – Three.js 3D
+# Thiền Viện An Nhiên 3D — V2
 
-Prototype 3D độc lập, viết bằng Vite + Three.js. Không sử dụng mã nguồn hoặc tài sản 3D của Sansa.
+Prototype Three.js + Vite chạy độc lập. V2 tăng chi tiết chibi và chuyển động theo state machine: đi vào, xoay về Phật, chuẩn bị, thực hiện, đứng lên và đi ra. Không sử dụng GLB có rig hoặc multiplayer.
 
 ## Chạy local
 
@@ -9,31 +9,26 @@ npm install
 npm run dev
 ```
 
-Mở URL Vite in ra (thường http://localhost:5173).
+## Build và triển khai Vercel
 
-## Deploy Vercel
+```bash
+npm run build
+```
 
-Push toàn bộ thư mục lên repo GitHub, chọn **Add New → Project** trên Vercel, import repo, chọn Framework **Vite**, chạy **Deploy**. Build command `npm run build`, output `dist` (đã khai báo sẵn trong `vercel.json`).
+- Framework: Vite
+- Root directory: `./`
+- Build command: `npm run build`
+- Output directory: `dist`
 
-## Bản prototype có
+Cập nhật GitHub repository đã gắn Vercel: thay các file trong repo bằng nội dung zip này, commit. Vercel sẽ tự deploy nếu bật auto-deployment.
 
-- Chánh điện 3D dựng từ geometry, vật liệu, đèn, đổ bóng; tượng Phật kiểu stylized 3D.
-- Chibi nam/nữ dựng bằng primitive với hierarchical joints (không phải GLB rig chuẩn).
-- Đi đến mục tiêu, thắp hương, dâng sen, quỳ lạy 3/108 nhịp, ngồi niệm 9/27/108 biến.
-- Camera xoay/zoom, giao diện responsive, nhật ký hoạt động, hủy thao tác.
-- Âm thanh tổng hợp Web Audio sau khi nhấn bật (trình duyệt thường chặn autoplay có tiếng).
+## Những điểm mới V2
 
-## Giới hạn & hướng nâng cấp
+- Hướng mặt và di chuyển đúng chiều; quỳ/ngồi hướng bàn thờ.
+- Chuyển động tư thế mượt hơn, có chuẩn bị/quỳ/cúi/đứng lại.
+- Mặt chibi có thêm tóc mái, chân mày, điểm sáng mắt và nụ cười.
+- Nhang/hoa được biểu diễn trong cảnh sau khi dâng.
 
-- Đây là prototype chức năng. Các cử động được lập trình theo khớp phân cấp, chưa dùng skinning, IK, GLB hoặc motion capture.
-- Cảnh chưa có multiplayer/WebSocket và không có backend/lưu trạng thái lâu dài.
-- Điểm đặt đồ lễ là vị trí staging; muốn hoa/nhang tồn tại sau khi cúng cần bổ sung state vật phẩm và animations tay chính xác.
-- Bản sản xuất nên dùng GLB riêng có skeleton chuẩn + AnimationMixer/clip, navmesh, collision, LOD, asset compression, và server-side room state.
-- Không có MP3 tụng kinh bản quyền được đóng gói. Âm nền hiện là tone tổng hợp, bật thủ công do chính sách autoplay của browser.
+## Giới hạn
 
-## V1.1 - Fix hướng nhân vật
-- Chibi được xây với hướng mặt local +Z. Khi đi, góc yaw dùng `Math.atan2(d.x, d.z)` (không dùng số âm).
-- Khi đến đệm/lư/điện, nhân vật quay về hướng tượng Phật (world -Z = yaw Math.PI).
-- Vị trí lễ Phật và niệm Phật đã dời vào giữa đệm ngồi.
-- Khi dừng, nhân vật quay về trạng thái đứng ban đầu.
-- Đẩy `src/main.js` mới lên GitHub, Vercel sẽ tự redeploy nếu đã liên kết repo.
+Mô hình và chuyển động vẫn là mesh + joint dựng procedural bằng code, không phải file GLB rig chuyên nghiệp. Chưa có điều khiển bằng animation clip hoặc đồng bộ nhiều người. Không thể đảm bảo mọi thiết bị chạy mượt khi chưa kiểm thử trình duyệt thực tế.
