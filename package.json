@@ -1,1 +1,16 @@
-{"name":"sansa-inspired-temple-3d","private":true,"version":"1.0.0","type":"module","scripts":{"dev":"vite --host 0.0.0.0","build":"vite build","preview":"vite preview --host 0.0.0.0"},"dependencies":{"three":"^0.180.0","@supabase/supabase-js":"^2.57.0","vite":"^7.1.0"},"devDependencies":{}}
+{
+  "name": "tiktok-live-temple-rpc",
+  "version": "1.0.0",
+  "description": "TikTok Live RPC Interactive Buddhist Temple (Bun.js + ZeroTTS giọng Mai Chi)",
+  "main": "server.js",
+  "scripts": {
+    "start": "bun run server.js",
+    "dev": "bun --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "tiktok-live-connector": "^2.1.0",
+    "ws": "^8.18.0"
+  }
+}
