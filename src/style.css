@@ -60,3 +60,53 @@
  .sidebar{transition:transform .22s ease}
  .sidebar.closed{transform:translateX(calc(-100% - 15px))}
 }
+
+
+/* V4.2: six activities in a simple bottom-center dock, chat attached to left activity rail. */
+.activity-dock{position:absolute;left:50%;bottom:83px;transform:translateX(-50%);display:flex;gap:7px;align-items:stretch;padding:8px 10px;border:1px solid #ead8be;border-radius:20px;background:#fffaf3ec;box-shadow:0 12px 34px #62412c2d;pointer-events:auto;z-index:9;max-width:calc(100vw - 24px)}
+.activity-dock .activity{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:81px;min-width:75px;min-height:71px;gap:3px;padding:5px 6px;background:transparent;border:1px solid transparent;border-radius:14px}
+.activity-dock .activity:hover,.activity-dock .activity:focus-visible{background:#f9eddc;border-color:#e5ccac}
+.activity-dock .activity.active{background:#f4e1cb;border-color:#cda36f}
+.activity-dock .activity-icon{width:35px;height:35px;background:#f6eadc;font-size:23px;border-radius:12px;flex-shrink:0}
+.activity-dock .activity strong{display:block;white-space:nowrap;font-size:10px;line-height:1.2}
+.activity-dock .activity small{display:none}
+.bottom{bottom:18px;left:50%;transform:translateX(-50%);z-index:10}
+.sidebar{width:274px;gap:8px;bottom:18px;max-height:calc(100vh - 116px)}
+.sidebar .activities{flex:0 1 auto;max-height:min(49vh,390px);padding:13px 15px;overflow-y:auto}
+.sidebar .activities h2{font-size:16px}
+.sidebar .activities .sub{margin-bottom:7px}
+.sidebar .chat-panel{position:relative;right:auto;bottom:auto;width:100%;height:auto;min-height:170px;flex:1 1 190px;display:none;z-index:1;border-radius:17px;background:#fffaf4e7;box-shadow:0 8px 25px #67442919;overflow:hidden}
+.sidebar .chat-panel.chat-ready{display:flex}
+.sidebar .chat-panel .chat-heading{padding:9px 12px 4px}
+.sidebar .chat-panel .chat-heading button{display:none}
+.sidebar .chat-panel .chat-info{padding:1px 12px 5px;font-size:9px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.sidebar .chat-panel .chat-messages{background:linear-gradient(180deg,#fffaf400,#fffaf4aa);padding:9px 12px;gap:6px;justify-content:flex-end}
+.sidebar .chat-panel .chat-message{display:block;max-width:100%;width:fit-content;padding:5px 8px;background:#eadfd09c;line-height:1.5}
+.sidebar .chat-panel .chat-message strong{font-size:11px;margin-right:7px;color:#95704a}
+.sidebar .chat-panel .chat-message span{font-size:11px}
+.sidebar .chat-panel .chat-message.own{align-self:flex-start;background:#def0e4b8}
+.sidebar .chat-panel .chat-form{padding:8px;background:#fffaf4b3}
+.sidebar .chat-panel.collapsed{height:auto;min-height:170px}
+.sidebar .chat-panel.collapsed .chat-info,.sidebar .chat-panel.collapsed .chat-messages,.sidebar .chat-panel.collapsed .chat-form{display:initial}
+.sidebar .chat-panel.collapsed .chat-messages{display:flex}
+.sidebar .chat-panel.collapsed .chat-form{display:flex}
+.sidebar .feed{padding:0;flex:0 0 auto;min-height:unset;max-height:160px;overflow:hidden}
+.sidebar .feed>h3{display:none}
+.sidebar .feed .log{display:none}
+.sidebar .feed.expanded .log{display:block;padding:0 12px 10px;overflow-y:auto;max-height:120px}
+.log-toggle{display:block;border:0;background:transparent;padding:10px 13px;width:100%;text-align:left;color:#70513e;font-size:11px;font-weight:800}
+@media(max-height:760px) and (min-width:761px){.sidebar .activities{max-height:43vh}.sidebar .feed{display:block}.sidebar .chat-panel{min-height:130px}}
+@media(max-width:760px){
+ .sidebar{top:70px;left:8px;bottom:128px;width:min(246px,68vw);max-height:calc(100vh - 204px);gap:6px}
+ .sidebar .activities{max-height:42%;padding:10px}
+ .sidebar .chat-panel{width:100%;min-height:140px;flex-basis:135px;border-radius:12px}
+ .sidebar .chat-panel .chat-message strong{font-size:9px}
+ .sidebar .chat-panel .chat-message span{font-size:9px}
+ .sidebar .feed{display:none}
+ .activity-dock{left:50%;bottom:67px;gap:3px;padding:5px;max-width:calc(100vw - 12px);width:min(100%,560px);overflow-x:auto;justify-content:space-around;border-radius:14px}
+ .activity-dock .activity{flex:1 0 48px;min-width:48px;width:55px;min-height:51px;padding:3px 1px}
+ .activity-dock .activity-icon{width:28px;height:28px;font-size:18px;border-radius:9px}
+ .activity-dock .activity strong{font-size:8px;white-space:normal;line-height:1.1}
+ .bottom{left:8px;right:8px;bottom:8px;transform:none;z-index:10}
+ .chat-panel.collapsed{height:auto}
+}

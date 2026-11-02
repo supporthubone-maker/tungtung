@@ -53,7 +53,7 @@ export function connectRoom({ onPlayers = () => {}, onStatus = () => {}, onCount
   };
   function start() {
     if (started) return; started = true;
-    if (!enabled) { onStatus('◌ Chưa cấu hình Supabase'); onCount(1); return; }
+    if (!enabled) { onStatus('◌ Chưa kết nối phòng'); onCount(1); return; }
     onStatus('◌ Đang kết nối…');
     channel = client.channel(`an-nhien:v4:${safeRoom}`, {
       config: { broadcast: { self: false, ack: false }, presence: { key: id } }
@@ -73,10 +73,10 @@ export function connectRoom({ onPlayers = () => {}, onStatus = () => {}, onCount
       if (subscription === 'SUBSCRIBED') {
         connected = true; onStatus(`● Đã kết nối · ${safeRoom}`);
         lastPresence = JSON.stringify(state);
-        try { await channel.track(presencePayload()); } catch (err) { onStatus('⚠ Không gửi được trạng thái'); console.warn(err); }
+        try { await channel.track(presencePayload()); } catch (err) { onStatus('⚠ Chưa đồng bộ trạng thái'); console.warn(err); }
         emitPeople();
       } else if (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(subscription)) {
-        connected = false; people.clear(); emitPeople(); onStatus('⚠ Mất kết nối Realtime');
+        connected = false; people.clear(); emitPeople(); onStatus('⚠ Mất kết nối phòng');
       }
     });
   }

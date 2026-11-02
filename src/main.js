@@ -8,7 +8,35 @@ import { createMeritSystem, nextLevel, currentLevelStart } from './progress.js';
 import { drawFortune } from './fortune.js';
 
 const app = document.querySelector('#app');
-app.innerHTML = `<div id="scene"></div><div class="overlay"><div class="topbar"><div class="brand"><span class="mark">🪷</span><div><strong>Thiền Viện An Nhiên</strong><small>KHÔNG GIAN TÂM LINH 3D</small></div></div><div class="righttop"><button id="toggleMenu" class="pill menu-toggle" type="button">☰ Hoạt động</button><div class="pill"><span class="mobilehide">🌤️ Bình an mỗi ngày</span> <button id="sound">🔇 Âm thanh</button></div><div class="pill">👤 <span id="actorlabel">Chibi nữ</span></div><div class="pill" id="leveltop">🪷 Cấp 0 · 0 lượt</div><div class="pill" id="online">👥 0 người</div></div></div><div class="welcome">KHÔNG GIAN THANH TỊNH<strong>Chánh điện an nhiên</strong></div><aside class="sidebar"><section class="panel activities"><div class="eyebrow">HOẠT ĐỘNG TÂM LINH</div><h2>Hành trình an yên 🪷</h2><p class="sub">Chọn một hoạt động để nhân vật thực hiện</p><button class="activity" data-act="incense"><span class="activity-icon">🪔</span><span><strong>Thắp hương</strong><small>Dâng 3 nén hương lên lư</small></span></button><button class="activity" data-act="bow"><span class="activity-icon">🙏</span><span><strong>Lễ Phật</strong><small>Quỳ lạy 3 hoặc 108 lần</small></span></button><button class="activity" data-act="flower"><span class="activity-icon">🪷</span><span><strong>Dâng hoa sen</strong><small>Dâng hoa trước tượng Phật</small></span></button><button class="activity" data-act="chant"><span class="activity-icon">📿</span><span><strong>Ngồi niệm Phật</strong><small>Ngồi xếp bằng · lần chuỗi 108 hạt</small></span></button><button class="activity" data-act="fortune"><span class="activity-icon">🎋</span><span><strong>Lắc quẻ xin xăm</strong><small>Lắc ống xăm và nhận lời chiêm nghiệm</small></span></button><button class="activity" data-act="wish"><span class="activity-icon">🎀</span><span><strong>Cầu duyên · buộc dây đỏ</strong><small>Đến cây đa treo dây ước nguyện</small></span></button><div class="merit-mini"><div><strong id="merit-level">Cấp 0</strong><span id="merit-turns">0 lượt</span></div><div class="merit-track"><div id="merit-bar"></div></div><small id="merit-next">Còn 5 lượt để lên cấp 1</small><small id="dharma-label">🪷 Pháp danh: chưa được tặng</small><small id="save-mode">Lưu tạm trên thiết bị</small></div><div class="setting"><label for="wishTree">Cây cầu duyên</label><select id="wishTree"><option value="left">Cây bên trái</option><option value="right">Cây bên phải</option></select></div><div class="setting"><label for="scenestyle">Chánh điện</label><select id="scenestyle"><option value="gold" selected>Vàng son · Hoa sen</option><option value="original">An Nhiên V3</option></select></div><div class="setting"><label for="daymode">Ánh sáng</label><select id="daymode"><option value="auto">Tự động theo giờ</option><option value="morning">Sáng</option><option value="noon">Trưa</option><option value="afternoon">Chiều</option><option value="night">Tối</option></select></div><div class="setting"><label for="gender">Nhân vật</label><select id="gender"><option value="female">Chibi nữ</option><option value="male">Chibi nam</option></select></div><div class="setting"><label for="bows">Số lần lạy</label><select id="bows"><option value="3">3 lần</option><option value="108">108 lần</option></select></div><div class="setting"><label for="chants">Số biến niệm</label><select id="chants"><option value="9">9 biến (demo)</option><option value="27">27 biến</option><option value="108" selected>108 biến</option></select></div><div class="activity-note">💡 Có thể xoay cảnh bằng chuột / chạm và phóng to thu nhỏ.</div></section><section class="panel feed"><h3>📜 Nhật ký hoạt động</h3><div id="log" class="log"></div></section></aside><div class="bottom"><div class="statusdot"></div><span id="status" class="status">Sẵn sàng bắt đầu</span><div class="progress"><div id="progress"></div></div><button id="cancel" class="iconbtn" title="Dừng hoạt động">■ Dừng</button><button id="resetcam" class="iconbtn" title="Khôi phục camera">⌖</button></div><div class="chat-panel" id="chat-panel"><div class="chat-heading"><strong>💬 Trò chuyện trong chánh điện</strong><button id="toggleChat" title="Thu gọn/mở chat" type="button">−</button></div><div id="chat-info" class="chat-info">Chỉ những người cùng phòng nhìn thấy tin nhắn · không lưu lịch sử.</div><div id="chat-messages" class="chat-messages" aria-live="polite"></div><form id="chat-form" class="chat-form"><input id="chat-input" maxlength="180" placeholder="Gửi lời chào an lành..." autocomplete="off" aria-label="Nội dung chat"/><button id="chat-send" type="submit">Gửi</button></form></div><div class="hint">Kéo để xoay · Cuộn để thu phóng</div><div id="toast"></div><div class="fortune-modal" id="fortune-modal" hidden><div class="fortune-card" role="dialog" aria-modal="true" aria-labelledby="fortune-title"><span class="fortune-icon">🎋</span><h2 id="fortune-title">Quẻ An Nhiên</h2><div id="fortune-number" class="fortune-number"></div><p id="fortune-verse" class="fortune-verse"></p><p id="fortune-guidance"></p><small>Quẻ chỉ dành cho chiêm nghiệm, giải trí, không dự đoán tương lai.</small><button id="fortune-close" type="button">Đóng quẻ</button></div></div><div class="join" id="join"><div class="joincard"><div class="joinlotus">🪷</div><h2>Chào mừng đến chánh điện</h2><p>Nhập tên hiển thị và chọn nhân vật. Pháp danh ảo được tặng ở cấp 3.</p><label for="displayname">Tên hiển thị</label><input id="displayname" maxlength="24" value="Khách an nhiên" /><label for="joinGender">Nhân vật</label><select id="joinGender"><option value="female">Nữ · tóc búi, đồ lam</option><option value="male">Nam · tóc ngắn, đồ lam</option></select><button id="enterRoom">Vào chánh điện</button><small id="connection-note">Dùng cùng liên kết và cùng mã phòng để nhìn thấy nhau. Đồng bộ cần Supabase Realtime.</small></div></div></div>`;
+app.innerHTML = `<div id="scene"></div><div class="overlay"><div class="topbar"><div class="brand"><span class="mark">🪷</span><div><strong>Thiền Viện An Nhiên</strong><small>KHÔNG GIAN TÂM LINH 3D</small></div></div><div class="righttop"><button id="toggleMenu" class="pill menu-toggle" type="button">☰ Hoạt động</button><div class="pill"><span class="mobilehide">🌤️ Bình an mỗi ngày</span> <button id="sound">🔇 Âm thanh</button></div><div class="pill">👤 <span id="actorlabel">Chibi nữ</span></div><div class="pill" id="leveltop">🪷 Cấp 0 · 0 lượt</div><div class="pill" id="online">👥 0 người</div></div></div><div class="welcome">KHÔNG GIAN THANH TỊNH<strong>Chánh điện an nhiên</strong></div><aside class="sidebar"><section class="panel activities"><div class="eyebrow">HOẠT ĐỘNG TÂM LINH</div><h2>Hành trình an yên 🪷</h2><p class="sub">Chọn một hoạt động để nhân vật thực hiện</p><button class="activity" data-act="incense"><span class="activity-icon">🪔</span><span><strong>Thắp hương</strong><small>Dâng 3 nén hương lên lư</small></span></button><button class="activity" data-act="bow"><span class="activity-icon">🙏</span><span><strong>Lễ Phật</strong><small>Quỳ lạy 3 hoặc 108 lần</small></span></button><button class="activity" data-act="flower"><span class="activity-icon">🪷</span><span><strong>Dâng hoa sen</strong><small>Dâng hoa trước tượng Phật</small></span></button><button class="activity" data-act="chant"><span class="activity-icon">📿</span><span><strong>Ngồi niệm Phật</strong><small>Ngồi xếp bằng · lần chuỗi 108 hạt</small></span></button><button class="activity" data-act="fortune"><span class="activity-icon">🎋</span><span><strong>Lắc quẻ xin xăm</strong><small>Lắc ống xăm và nhận lời chiêm nghiệm</small></span></button><button class="activity" data-act="wish"><span class="activity-icon">🎀</span><span><strong>Cầu duyên · buộc dây đỏ</strong><small>Đến cây đa treo dây ước nguyện</small></span></button><div class="merit-mini"><div><strong id="merit-level">Cấp 0</strong><span id="merit-turns">0 lượt</span></div><div class="merit-track"><div id="merit-bar"></div></div><small id="merit-next">Còn 5 lượt để lên cấp 1</small><small id="dharma-label">🪷 Pháp danh: chưa được tặng</small><small id="save-mode">Lưu tạm trên thiết bị</small></div><div class="setting"><label for="wishTree">Cây cầu duyên</label><select id="wishTree"><option value="left">Cây bên trái</option><option value="right">Cây bên phải</option></select></div><div class="setting"><label for="scenestyle">Chánh điện</label><select id="scenestyle"><option value="gold" selected>Vàng son · Hoa sen</option><option value="original">An Nhiên V3</option></select></div><div class="setting"><label for="daymode">Ánh sáng</label><select id="daymode"><option value="auto">Tự động theo giờ</option><option value="morning">Sáng</option><option value="noon">Trưa</option><option value="afternoon">Chiều</option><option value="night">Tối</option></select></div><div class="setting"><label for="gender">Nhân vật</label><select id="gender"><option value="female">Chibi nữ</option><option value="male">Chibi nam</option></select></div><div class="setting"><label for="bows">Số lần lạy</label><select id="bows"><option value="3">3 lần</option><option value="108">108 lần</option></select></div><div class="setting"><label for="chants">Số biến niệm</label><select id="chants"><option value="9">9 biến (demo)</option><option value="27">27 biến</option><option value="108" selected>108 biến</option></select></div><div class="activity-note">💡 Có thể xoay cảnh bằng chuột / chạm và phóng to thu nhỏ.</div></section><section class="panel feed"><h3>📜 Nhật ký hoạt động</h3><div id="log" class="log"></div></section></aside><div class="bottom"><div class="statusdot"></div><span id="status" class="status">Sẵn sàng bắt đầu</span><div class="progress"><div id="progress"></div></div><button id="cancel" class="iconbtn" title="Dừng hoạt động">■ Dừng</button><button id="resetcam" class="iconbtn" title="Khôi phục camera">⌖</button></div><div class="chat-panel" id="chat-panel"><div class="chat-heading"><strong>💬 Trò chuyện trong chánh điện</strong><button id="toggleChat" title="Thu gọn/mở chat" type="button">−</button></div><div id="chat-info" class="chat-info">Chỉ những người cùng phòng nhìn thấy tin nhắn · không lưu lịch sử.</div><div id="chat-messages" class="chat-messages" aria-live="polite"></div><form id="chat-form" class="chat-form"><input id="chat-input" maxlength="180" placeholder="Gửi lời chào an lành..." autocomplete="off" aria-label="Nội dung chat"/><button id="chat-send" type="submit">Gửi</button></form></div><div class="hint">Kéo để xoay · Cuộn để thu phóng</div><div id="toast"></div><div class="fortune-modal" id="fortune-modal" hidden><div class="fortune-card" role="dialog" aria-modal="true" aria-labelledby="fortune-title"><span class="fortune-icon">🎋</span><h2 id="fortune-title">Quẻ An Nhiên</h2><div id="fortune-number" class="fortune-number"></div><p id="fortune-verse" class="fortune-verse"></p><p id="fortune-guidance"></p><small>Quẻ chỉ dành cho chiêm nghiệm, giải trí, không dự đoán tương lai.</small><button id="fortune-close" type="button">Đóng quẻ</button></div></div><div class="join" id="join"><div class="joincard"><div class="joinlotus">🪷</div><h2>Chào mừng đến chánh điện</h2><p>Nhập tên hiển thị và chọn nhân vật. Pháp danh ảo được tặng ở cấp 3.</p><label for="displayname">Tên hiển thị</label><input id="displayname" maxlength="24" value="Khách an nhiên" /><label for="joinGender">Nhân vật</label><select id="joinGender"><option value="female">Nữ · tóc búi, đồ lam</option><option value="male">Nam · tóc ngắn, đồ lam</option></select><button id="enterRoom">Vào chánh điện</button><small id="connection-note">Vào cùng phòng để gặp gỡ và trò chuyện với các Phật tử khác.</small></div></div></div>`;
+
+
+// V4.2: Reuse all original activity button handlers; only move their visual location.
+const dock = document.createElement('nav');
+dock.className = 'activity-dock';
+dock.setAttribute('aria-label', 'Chọn hoạt động tâm linh');
+for (const button of document.querySelectorAll('.activities > .activity')) {
+  const activityName = button.querySelector('strong')?.textContent?.trim() || 'Hoạt động';
+  button.title = activityName;
+  button.setAttribute('aria-label', activityName);
+  dock.appendChild(button);
+}
+document.querySelector('.overlay').appendChild(dock);
+const liveChat = document.querySelector('#chat-panel');
+document.querySelector('.sidebar').insertBefore(liveChat, document.querySelector('.feed'));
+document.querySelector('.activities .sub').textContent = 'Chọn biểu tượng hoạt động phía dưới để bắt đầu';
+const logPanel = document.querySelector('.feed');
+const logToggle = document.createElement('button');
+logToggle.type = 'button';
+logToggle.className = 'log-toggle';
+logToggle.textContent = '📜 Nhật ký hoạt động ▾';
+logToggle.setAttribute('aria-expanded', 'false');
+logPanel.insertBefore(logToggle, logPanel.firstChild);
+logToggle.addEventListener('click', () => {
+  const opened = logPanel.classList.toggle('expanded');
+  logToggle.setAttribute('aria-expanded', String(opened));
+  logToggle.textContent = opened ? '📜 Nhật ký hoạt động ▴' : '📜 Nhật ký hoạt động ▾';
+});
 
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xf6e9d9); scene.fog = new THREE.Fog(0xf6e9d9,19,42);
 const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'}); renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.7)); renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.45;document.querySelector('#scene').append(renderer.domElement);
@@ -213,7 +241,7 @@ const soundBtn=document.querySelector('#sound');function audioStart(){audioCtx??
 const label=document.createElement('div');label.className='player-label';document.body.append(label);
 let playerName='Khách an nhiên';let entered=false;let lastChatAt=0;let ownBubbleUntil=0;
 let syncStatus='Chưa kết nối';
-const room=connectRoom({onPlayers:renderRemotes,onStatus:(t)=>{syncStatus=t;document.querySelector('#chat-info').textContent=`${t} · Phòng: ${room.roomId} · Tin nhắn không lưu lịch sử.`;document.querySelector('#chat-send').disabled=!room.isConnected()},onCount:(n)=>{document.querySelector('#online').textContent=`👥 ${n} người`},onMessage:receiveChat,onRitual:(p)=>{wishTrees.addRibbon(p.side)}});
+const room=connectRoom({onPlayers:renderRemotes,onStatus:(t)=>{syncStatus=t;document.querySelector('#chat-info').textContent=`${t} · Tin nhắn chỉ hiển thị trong phòng.`;document.querySelector('#chat-send').disabled=!room.isConnected()},onCount:(n)=>{document.querySelector('#online').textContent=`👥 ${n} người`;document.querySelector('.chat-heading strong').textContent=`💬 Trò chuyện · ${n} người`},onMessage:receiveChat,onRitual:(p)=>{wishTrees.addRibbon(p.side)}});
 const merits=createMeritSystem(room,{onChange:updateMeritUI,onNotice:(s)=>{entry(s);showToast(s)}});
 function updateMeritUI({merits:turns,level,dharmaName,cloud}){
  document.querySelector('#leveltop').textContent=`🪷 Cấp ${level} · ${turns} lượt`;
@@ -223,13 +251,16 @@ function updateMeritUI({merits:turns,level,dharmaName,cloud}){
  document.querySelector('#merit-bar').style.width=`${Math.round((turns-start)/(next-start)*100)}%`;
  document.querySelector('#merit-next').textContent=`Còn ${next-turns} lượt để lên cấp ${level+1}`;
  document.querySelector('#dharma-label').textContent=dharmaName?`🪷 Pháp danh ảo: ${dharmaName}`:'🪷 Pháp danh: mở ở cấp 3';
- document.querySelector('#save-mode').textContent=cloud?'☁ Đã lưu vào Supabase':'💾 Chỉ lưu trên trình duyệt này';
+ document.querySelector('#save-mode').textContent=cloud?'☁ Đã lưu tiến độ':'💾 Đã lưu trên thiết bị';
  room?.publish();
 }
 function showToast(text){const toast=document.querySelector('#toast');toast.textContent=text;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('show'),3700)}
 const remotes=new Map();
 function createRemoteAvatar(id){
  const marker=new THREE.Group();scene.add(marker);
+ // A subtle marker makes other visitors visible even if avatars momentarily overlap.
+ const halo=new THREE.Mesh(new THREE.TorusGeometry(.49,.025,6,40),new THREE.MeshBasicMaterial({color:0x63a894,transparent:true,opacity:.88,depthWrite:false}));
+ halo.rotation.x=-Math.PI/2;halo.position.y=.08;marker.add(halo);
  const outfit=mat(0xaabbb7),rSkin=mat(0xf6c6ac),rHair=mat(0x49302b),rPants=mat(0x82928a);
  const bodyGroup=new THREE.Group();marker.add(bodyGroup);bodyGroup.position.y=1.04;
  const chest=sphere(.39,outfit,bodyGroup,0,.1,0);chest.scale.set(1,1.2,.74);
@@ -245,9 +276,24 @@ function createRemoteAvatar(id){
  return {marker,name,bubble,bodyGroup,bunMesh,hairLocks,feet,crossed,target:new THREE.Vector3(),lastAction:'',action:'idle',phase:'idle',expires:0,id};
 }
 function renderRemotes(players){
+ // V4 bugfix: in V4 everyone spawned at (0, 4.4), exactly overlapping the local avatar.
+ // All clients sort the same presence IDs and compute distinct standing positions.
+ const ids=[...new Set([room.id,...players.map(p=>p.id).filter(Boolean)])].sort();
+ const ownIndex=Math.max(0,ids.indexOf(room.id));
+ const pair=Math.floor(ownIndex/2), side=ownIndex%2===0?-1:1;
+ const nextHome=new THREE.Vector3(side*(1.22+pair*1.27),.23,4.40+pair*.52);
+ const wasAtHome=figure.position.distanceTo(home)<.65;
+ if(home.distanceTo(nextHome)>.015){
+   home.copy(nextHome);
+   if(entered && !active && wasAtHome){figure.position.copy(home);room.update(currentState())}
+ }
+ const roster=players.map(p=>p.name||'Khách').slice(0,8).join(' · ');
+ document.querySelector('#chat-info').textContent=room.isConnected()
+   ? `● Đã kết nối · ${players.length+1} người${roster?' · '+roster:''}`
+   : syncStatus;
  const seen=new Set();
  for(const p of players){if(p.id===room.id)continue;seen.add(p.id);
-  let el=remotes.get(p.id);if(!el){el=createRemoteAvatar(p.id);remotes.set(p.id,el);el.marker.position.set(p.x||0,.23,p.z||4)}
+  let el=remotes.get(p.id);if(!el){el=createRemoteAvatar(p.id);remotes.set(p.id,el);el.marker.position.set(p.x??0,.23,p.z??4.4)}
   el.target.set(p.x??0,.23,p.z??4);el.targetRotation=p.rotation??0;el.action=p.action||'idle';el.phase=p.phase||'idle';
   el.bunMesh.visible=p.gender!=='male';el.hairLocks.forEach(h=>h.visible=p.gender==='male');
   const level=Number(p.level)||0;
@@ -279,6 +325,8 @@ enterButton.addEventListener('click',async()=>{
  document.querySelector('#gender').dispatchEvent(new Event('change'));
  try{localStorage.setItem('temple-display-name',playerName)}catch{}
  entered=true;document.querySelector('#join').remove();document.querySelector('#chat-panel').classList.add('chat-ready');
+ // Starting position follows the same slot logic as the first Presence synchronization.
+ if(!active){home.set(-1.22,.23,4.4);figure.position.copy(home)}
  room.setState(currentState);room.start();entry(`${playerName} đã vào chánh điện`);
  await merits.init(playerName,document.querySelector('#gender').value);
  room.publish();
@@ -297,7 +345,7 @@ const chatForm=document.querySelector('#chat-form');chatForm.addEventListener('s
  const now=performance.now();if(now-lastChatAt<1500){showToast('Hãy gửi tin nhắn cách nhau ít nhất 1,5 giây');return}
  const field=document.querySelector('#chat-input');const value=field.value.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,180);
  if(!value)return;
- if(!room.sendChat(value,playerName)){showToast('Cần kết nối Supabase để trò chuyện cùng phòng');return}
+ if(!room.sendChat(value,playerName)){showToast('Chưa kết nối phòng trò chuyện');return}
  lastChatAt=now;field.value='';receiveChat({id:room.id,name:playerName,text:value,mine:true});
 });
 document.querySelector('#toggleChat').addEventListener('click',()=>document.querySelector('#chat-panel').classList.toggle('collapsed'));
@@ -313,6 +361,6 @@ function openFortune(){const result=drawFortune();document.querySelector('#fortu
 function applyLight(){const hour=new Date().getHours();const selected=document.querySelector('#daymode').value;const mode=selected==='auto'?(hour>=6&&hour<10?'morning':hour>=10&&hour<15?'noon':hour>=15&&hour<18?'afternoon':'night'):selected;
 const opts={morning:[0xfff1dc,1.25,2.1,2.6,1.4],noon:[0xf4e9dc,1.55,2.8,3.3,.9],afternoon:[0xf3cda8,1.17,1.7,2.5,2.0],night:[0x332e49,.85,.48,.65,5.0]};const [bg,exposure,hem,dir,altar]=opts[mode];scene.background.setHex(bg);scene.fog.color.setHex(bg);renderer.toneMappingExposure=exposure;skyLight.intensity=hem;sun.intensity=dir;warm.intensity=altar*24;sun.color.setHex(mode==='afternoon'?0xffae73:0xffe5b1)}
 document.querySelector('#daymode').addEventListener('change',applyLight);applyLight();setInterval(()=>{if(document.querySelector('#daymode').value==='auto')applyLight()},60000);
-entry('Chào mừng đến chánh điện 3D');entry('Hãy chọn một hoạt động bên trái để bắt đầu');
+entry('Chào mừng đến chánh điện 3D');entry('Hãy chọn một biểu tượng phía dưới để bắt đầu');
 function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);const narrow=innerWidth<760;controls.target.set(0,1.5,-1.4);if(narrow&&camera.position.x===9.5){camera.position.set(10.5,11,25)}}window.addEventListener('resize',resize);resize();
 function animate(){requestAnimationFrame(animate);let dt=Math.min(rayClock.getDelta(),.055);step(dt);controls.update();sanctuary.animate(time);wishTrees.animate(time);moveRemotes(dt);renderer.render(scene,camera);if(entered){label.textContent=playerName+(performance.now()<ownBubbleUntil?' · 💬 '+label.dataset.chat:'');projectLabel(label,figure,new THREE.Vector3(0,2.7,0));room.update(currentState())}else label.style.display='none';for(const el of remotes.values())projectLabel(el.name,el.marker,new THREE.Vector3(0,2.75,0))}animate();

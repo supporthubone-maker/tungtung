@@ -35,7 +35,7 @@ export function createMeritSystem(room, { onChange = () => {}, onNotice = () => 
         current = copy(data); cloud = true; notify(); return;
       } catch (err) {
         console.warn('Merit cloud setup: ', err);
-        onNotice('Lượt tu tập lưu trên máy này. Cần bật Anonymous Sign-Ins và chạy SQL để đồng bộ cấp độ.');
+        onNotice('Lượt tu tập đang được lưu trên thiết bị này. Chưa kết nối được nơi lưu tiến độ.');
       }
     }
     cloud = false; current = copy(local); notify();
@@ -53,7 +53,7 @@ export function createMeritSystem(room, { onChange = () => {}, onNotice = () => 
         return true;
       } catch (err) {
         console.warn('Merit award failed:', err);
-        onNotice('Chưa ghi được lượt lên Supabase. Hãy kiểm tra RPC / kết nối.');
+        onNotice('Chưa lưu được lượt tu tập. Vui lòng thử lại sau.');
         return false; // NEVER claim local reward if cloud write fails.
       }
     }
